@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -10,21 +7,27 @@ import java.net.Socket;
 public class Client {
     public static void main(String[] args) {
         try {
+
             System.out.println("\nCLIENT");
 
             int port = Integer.parseInt(args[1]);
-            Socket socket = new Socket(args[0], 2017);  // Клиент создает сокет и подключает его к порту на хосте
+            Socket socket = new Socket(args[0], port);  // Клиент создает сокет и подключает его к порту на хосте
             System.out.println("The connection is established.");
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+            DataInputStream inputStream = new DataInputStream(socket.getInputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String message = null;
+
+            String message;
             System.out.println("Type message and press Enter\n");
             while(true){
-                message = reader.readLine();
-                outputStream.writeUTF(message);
+                message = reader.readLine();    // читаем введенную строку
+                outputStream.writeUTF(message); // отсылаем сообщение серверу
                 outputStream.flush();
-                if (message.equalsIgnoreCase("quit"))
+                message = inputStream.readUTF(); // ждем ответа от сервера
+                System.out.println("Server sent me: " + message);
+
+                if (message.toLowerCase().endsWith("quit\""))
                     break;
             }
 
