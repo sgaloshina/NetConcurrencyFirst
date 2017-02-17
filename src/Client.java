@@ -24,8 +24,8 @@ public class Client {
                 message = reader.readLine();    // читаем введенную строку
                 outputStream.writeUTF(message); // отсылаем сообщение серверу
                 outputStream.flush();
-                message = inputStream.readUTF(); // ждем ответа от сервера
-                System.out.println("Server sent me: " + message);
+                //message = inputStream.readUTF(); // ждем ответа от сервера
+                //System.out.println("Server sent me: " + message);
 
                 if (message.toLowerCase().endsWith("quit\""))
                     break;
