@@ -17,18 +17,22 @@ public class Client {
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
             String message;
-            System.out.println("Type message and press Enter\n");
-            while(true){
-                message = reader.readLine();    // читаем введенную строку
-                outputStream.writeUTF(message); // отсылаем сообщение серверу
-                outputStream.flush();
-                //message = inputStream.readUTF(); // ждем ответа от сервера
-                //System.out.println("Server sent me: " + message);
+            message = inputStream.readUTF(); // ждем ответа от сервера (подтверждение подключния)
+            System.out.println("Server: " + message);
 
-                if (message.toLowerCase().endsWith("quit\""))
-                    break;
+            if (message.equalsIgnoreCase("you are connected.")) {
+                System.out.println("me: ");
+                while (true) {
+                    message = reader.readLine();    // читаем введенную строку
+                    outputStream.writeUTF(message); // отсылаем сообщение серверу
+                    outputStream.flush();
+                    //message = inputStream.readUTF(); // ждем ответа от сервера
+                    //System.out.println("Server: " + message);
+
+                    if (message.equalsIgnoreCase("quit"))
+                        break;
+                }
             }
 
         } catch (IOException e) {
