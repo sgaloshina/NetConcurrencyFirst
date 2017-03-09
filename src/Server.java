@@ -1,25 +1,29 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by svetlana on 10.02.17.
  */
 public class Server {
+
+    private static int maxSessionCount;
+    private static volatile int sessionCount = 0;
+
+    public static void closeSession(){
+        sessionCount--;
+        System.out.println("Session closed");
+    }
+
     public static void main(String[] args) {
+        maxSessionCount = Integer.parseInt(args[1]);
         ServerSocket serverSocket = null;
         Socket socket = null;
-        List<Thread> threadList = new ArrayList();
-        final int MAX_CLIENT = 3;
 
         try {
-
             System.out.println("\nSERVER");
             int port = Integer.parseInt(args[0]);
             serverSocket = new ServerSocket(port);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,22 +34,16 @@ public class Server {
                 socket = serverSocket.accept();  // Ожидание соединения с клиентом
                 System.out.println("Client accepted");
 
-                // Убираем умершие потоки, чтобы освободить возможность подключения для нового клиента
-                for (int j = 0; j < threadList.size(); j++){
-                    if (!threadList.get(j).isAlive())
-                        threadList.remove(j);
-                }
-
                 // Если есть возможность подключить еще одного клиента
-                if (threadList.size() < MAX_CLIENT) {
+                if (sessionCount < maxSessionCount) {
                     Thread thread = new Thread(new Session(socket));
-                    threadList.add(thread);
+                    sessionCount++;
                     thread.setName("thread " + (++i));
                     thread.start();
                 }
                 else {
                     DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                    outputStream.writeUTF("Sorry, Server is overloaded.");
+                    outputStream.writeUTF("Sorry, Server is overloaded. Please try later");
                     outputStream.flush();
                     socket.close();
                     System.out.println("Connection closed");

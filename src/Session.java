@@ -1,6 +1,7 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -26,8 +27,6 @@ public class Session implements Runnable{
             while (true) {
                 message = inputStream.readUTF();    // Сервер ожидает сообщение от Клиента
                 System.out.println(Thread.currentThread().getName() + " Client: " + message);  // Выводим сообщение клиента
-                //outputStream.writeUTF("I got a message \"" + message + "\"");
-                //outputStream.flush();
                 if (message.equalsIgnoreCase("quit")) {
                     socket.close();
                     System.out.println("Connection closed");
@@ -36,6 +35,10 @@ public class Session implements Runnable{
             }
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Connection interrupted");
+        }
+        finally {
+            Server.closeSession();
         }
     }
 }

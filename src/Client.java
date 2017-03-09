@@ -7,7 +7,6 @@ import java.net.Socket;
 public class Client {
     public static void main(String[] args) {
         try {
-
             System.out.println("\nCLIENT");
 
             int port = Integer.parseInt(args[1]);
@@ -22,14 +21,11 @@ public class Client {
             System.out.println("Server: " + message);
 
             if (message.equalsIgnoreCase("you are connected.")) {
-                System.out.println("me: ");
+                System.out.println("Input message and press Enter to send");
                 while (true) {
                     message = reader.readLine();    // читаем введенную строку
                     outputStream.writeUTF(message); // отсылаем сообщение серверу
                     outputStream.flush();
-                    //message = inputStream.readUTF(); // ждем ответа от сервера
-                    //System.out.println("Server: " + message);
-
                     if (message.equalsIgnoreCase("quit"))
                         break;
                 }
