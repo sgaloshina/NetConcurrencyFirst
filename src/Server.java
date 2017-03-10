@@ -7,12 +7,16 @@ import java.net.Socket;
  */
 public class Server {
 
+    private static final Object lock = new Object();
     private static int maxSessionCount;
     private static volatile int sessionCount = 0;
 
     public static void closeSession(){
-        sessionCount--;
-        System.out.println("Session closed");
+        synchronized (lock) {
+            sessionCount--;
+            lock.notify();
+            System.out.println("Session closed");
+        }
     }
 
     public static void main(String[] args) {
@@ -35,18 +39,21 @@ public class Server {
                 System.out.println("Client accepted");
 
                 // Если есть возможность подключить еще одного клиента
-                if (sessionCount < maxSessionCount) {
-                    Thread thread = new Thread(new Session(socket));
-                    sessionCount++;
-                    thread.setName("thread " + (++i));
-                    thread.start();
+                synchronized (lock) {
+                    if (sessionCount == maxSessionCount)
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                 }
-                else {
-                    DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                    outputStream.writeUTF("Sorry, Server is overloaded. Please try later");
-                    outputStream.flush();
-                    socket.close();
-                    System.out.println("Connection closed");
+                synchronized (lock) {
+                    if (sessionCount < maxSessionCount) {
+                        Thread thread = new Thread(new Session(socket));
+                        sessionCount++;
+                        thread.setName("thread " + (++i));
+                        thread.start();
+                    }
                 }
             }
             catch (IOException e) {

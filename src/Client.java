@@ -11,7 +11,7 @@ public class Client {
 
             int port = Integer.parseInt(args[1]);
             Socket socket = new Socket(args[0], port);  // Клиент создает сокет и подключает его к порту на хосте
-            System.out.println("The connection is established.");
+            System.out.println("The connection is established. Loading...");
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
