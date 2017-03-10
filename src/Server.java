@@ -7,14 +7,15 @@ import java.net.Socket;
  */
 public class Server {
 
-    private static final Object lock = new Object();
-    private static int maxSessionCount;
-    private static volatile int sessionCount = 0;
+    private static final Object lock = new Object();    // монитор
+    private static int maxSessionCount;     // максимальное количество одновременных сессий. Передается в аргументах main.
+    private static volatile int sessionCount = 0;   // текущее количество сессий
 
+    // декремент счетчика сессий. Вызывается при закрытии сессии.
     public static void closeSession(){
         synchronized (lock) {
             sessionCount--;
-            lock.notify();
+            lock.notifyAll();       // оповещаем ждущие потоки
             System.out.println("Session closed");
         }
     }
@@ -38,7 +39,8 @@ public class Server {
                 socket = serverSocket.accept();  // Ожидание соединения с клиентом
                 System.out.println("Client accepted");
 
-                // Если есть возможность подключить еще одного клиента
+                // Если есть возможность подключить еще одного клиента, подключаем, инкрементим счетчик
+                // Если нет возможности, вызываем wait()
                 synchronized (lock) {
                     if (sessionCount == maxSessionCount)
                         try {

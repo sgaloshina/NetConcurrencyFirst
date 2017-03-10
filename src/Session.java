@@ -38,7 +38,7 @@ public class Session implements Runnable{
             System.out.println("Connection interrupted");
         }
         finally {
-            Server.closeSession();
+            Server.closeSession();  // при завершении сессии декрементим счетчик
         }
     }
 }
