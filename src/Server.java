@@ -41,6 +41,7 @@ public class Server {
 
                 // Если есть возможность подключить еще одного клиента, подключаем, инкрементим счетчик
                 // Если нет возможности, вызываем wait()
+                if (sessionCount == maxSessionCount)
                 synchronized (lock) {
                     if (sessionCount == maxSessionCount)
                         try {
@@ -49,14 +50,15 @@ public class Server {
                             e.printStackTrace();
                         }
                 }
-                synchronized (lock) {
-                    if (sessionCount < maxSessionCount) {
-                        Thread thread = new Thread(new Session(socket));
-                        sessionCount++;
-                        thread.setName("thread " + (++i));
-                        thread.start();
+                else
+                    synchronized (lock) {
+                        if (sessionCount < maxSessionCount) {
+                            Thread thread = new Thread(new Session(socket));
+                            sessionCount++;
+                            thread.setName("thread " + (++i));
+                            thread.start();
+                        }
                     }
-                }
             }
             catch (IOException e) {
                 e.printStackTrace();;
