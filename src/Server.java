@@ -10,12 +10,13 @@ public class Server {
     private static final Object lock = new Object();    // монитор
     private static int maxSessionCount;     // максимальное количество одновременных сессий. Передается в аргументах main.
     private static volatile int sessionCount = 0;   // текущее количество сессий
+    static Channel channel = new Channel(maxSessionCount);
 
     // декремент счетчика сессий. Вызывается при закрытии сессии.
     public static void closeSession(){
         synchronized (lock) {
             sessionCount--;
-            lock.notifyAll();       // оповещаем ждущие потоки
+            lock.notify();       // оповещаем ждущий поток
             System.out.println("Session closed");
         }
     }
@@ -41,24 +42,20 @@ public class Server {
 
                 // Если есть возможность подключить еще одного клиента, подключаем, инкрементим счетчик
                 // Если нет возможности, вызываем wait()
-                if (sessionCount == maxSessionCount)
                 synchronized (lock) {
-                    if (sessionCount == maxSessionCount)
+                    while (sessionCount == maxSessionCount) {
                         try {
                             lock.wait();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                }
-                else
-                    synchronized (lock) {
-                        if (sessionCount < maxSessionCount) {
-                            Thread thread = new Thread(new Session(socket));
-                            sessionCount++;
-                            thread.setName("thread " + (++i));
-                            thread.start();
-                        }
                     }
+                    channel.put(new Session(socket));
+                    Thread thread = new Thread(channel.take());
+                    sessionCount++;
+                    thread.setName("thread " + (++i));
+                    thread.start();
+                }
             }
             catch (IOException e) {
                 e.printStackTrace();;
