@@ -1,3 +1,5 @@
+package concurrentutiles;
+
 import java.util.LinkedList;
 
 /**
@@ -11,7 +13,8 @@ public class Channel {
     public Channel(int maxCount) {
         this.maxCount = maxCount;
     }
-    void put(Runnable x) {
+
+    public void put(Runnable x) {
         synchronized (lock) {
             while(linkedList.size() == maxCount) {
                 try {
@@ -24,6 +27,7 @@ public class Channel {
             lock.notifyAll();
         }
     }
+
     Runnable take() {
         synchronized (lock) {
             while(linkedList.isEmpty()) {
@@ -35,6 +39,12 @@ public class Channel {
             }
             lock.notifyAll();
             return linkedList.removeFirst();
+        }
+    }
+
+    public int size(){
+        synchronized (lock){
+            return linkedList.size();
         }
     }
 
